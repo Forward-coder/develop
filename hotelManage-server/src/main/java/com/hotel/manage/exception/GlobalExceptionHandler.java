@@ -20,8 +20,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleValidationException(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult().getFieldError() != null 
-            ? e.getBindingResult().getFieldError().getDefaultMessage() 
+        var fieldError = e.getBindingResult().getFieldError();
+        String message = fieldError != null 
+            ? fieldError.getDefaultMessage() 
             : "参数校验失败";
         return Result.error(message);
     }
@@ -32,8 +33,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleBindException(BindException e) {
-        String message = e.getBindingResult().getFieldError() != null 
-            ? e.getBindingResult().getFieldError().getDefaultMessage() 
+        var fieldError = e.getBindingResult().getFieldError();
+        String message = fieldError != null 
+            ? fieldError.getDefaultMessage() 
             : "参数绑定失败";
         return Result.error(message);
     }

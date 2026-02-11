@@ -1,15 +1,15 @@
 import request from './request'
 
 // 获取房型列表
- export function getRoomTypeList(params = {}) {
+export function getRoomTypeList(params = {}) {
   return request({
     url: '/api/room-type/list',
     method: 'get',
     params
   }).then(res => {
     return {
-      list: res.data || [],
-      total: (res.data || []).length
+      list: res || [],
+      total: (res || []).length
     }
   })
 }

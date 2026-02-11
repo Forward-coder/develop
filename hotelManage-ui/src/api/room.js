@@ -16,8 +16,8 @@ export function getRoomList(params = {}) {
     params
   }).then(res => {
     return {
-      list: res.data || [],
-      total: (res.data || []).length
+      list: res || [],
+      total: (res || []).length
     }
   })
 }

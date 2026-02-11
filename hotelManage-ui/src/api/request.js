@@ -25,8 +25,8 @@ request.interceptors.response.use(
       ElMessage.error(data.message || '请求失败')
       return Promise.reject(new Error(data.message || '请求失败'))
     }
-    // 返回完整的响应对象，保持原有的数据结构
-    return res
+    // 返回Result对象中的data属性，即实际的数据
+    return data.data
   },
   (err) => {
     const msg = err.response?.data?.message || err.message || '网络错误'

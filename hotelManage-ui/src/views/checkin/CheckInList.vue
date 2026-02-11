@@ -129,8 +129,8 @@ async function loadList() {
     if (query.guestName) params.guestName = query.guestName
     
     const res = await getCheckInList(params)
-    // 根据响应拦截器的返回结构调整数据访问
-    list.value = res.data?.data || []
+    // 直接使用res，因为响应拦截器已经返回了实际的数据
+    list.value = res || []
   } catch (error) {
     console.error('加载入住列表失败:', error)
     list.value = []
@@ -140,8 +140,8 @@ async function loadList() {
 async function loadAvailableRooms() {
   try {
     const res = await getRoomList({ roomStatusId: 1 })
-    // 根据响应拦截器的返回结构调整数据访问
-    availableRooms.value = res.data?.data || res.data?.list || []
+    // 直接使用res.list，因为getRoomList函数返回的是{ list: [...], total: ... }
+    availableRooms.value = res.list || []
   } catch (error) {
     console.error('加载可用房间失败:', error)
     availableRooms.value = []

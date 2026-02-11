@@ -165,7 +165,7 @@ function openStatus(row) {
 
 async function submitStatus() {
   const s = roomStatusList.value.find(x => x.id === statusForm.roomStatusId)
-  await updateRoomStatus(currentRoom.value.id, statusForm.roomStatusId, s?.name)
+  await updateRoomStatus(currentRoom.value.id, statusForm.roomStatusId)
   ElMessage.success('状态已更新')
   statusDialogVisible.value = false
   loadList()
