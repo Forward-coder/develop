@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.manage.mapper.FloorMapper">
+
+    <resultMap id="BaseResultMap" type="com.hotel.manage.entity.Floor">
+        <id column="id" property="id" />
+        <result column="hotel_id" property="hotelId" />
+        <result column="code" property="code" />
+        <result column="name" property="name" />
+        <result column="sort_order" property="sortOrder" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, hotel_id, code, name, sort_order, is_enabled, created_at, updated_at
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO floor (hotel_id, code, name, sort_order, is_enabled)
+        VALUES (#{hotelId}, #{code}, #{name}, #{sortOrder}, #{isEnabled})
+    </insert>
+
+    <update id="update">
+        UPDATE floor
+        <set>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="isEnabled != null">is_enabled = #{isEnabled},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM floor WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM floor
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM floor
+        <where>
+            <if test="hotelId != null">AND hotel_id = #{hotelId}</if>
+            <if test="isEnabled != null">AND is_enabled = #{isEnabled}</if>
+        </where>
+        ORDER BY sort_order ASC
+    </select>
+
+</mapper>

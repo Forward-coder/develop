@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API测试页面</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>API测试工具</h1>
+    
+    <div>
+        <h2>直接请求测试</h2>
+        <button onclick="testDirectRequest()">测试直接请求 (http://localhost:8080/api/dict/reservation-status)</button>
+        <div id="direct-result"></div>
+    </div>
+    
+    <div>
+        <h2>相对路径请求测试</h2>
+        <button onclick="testRelativeRequest()">测试相对路径请求 (/api/dict/reservation-status)</button>
+        <div id="relative-result"></div>
+    </div>
+    
+    <div>
+        <h2>完整预订状态测试</h2>
+        <button onclick="testFullReservationFlow()">测试完整预订流程</button>
+        <div id="full-result"></div>
+    </div>
+
+    <script>
+        async function testDirectRequest() {
+            const resultDiv = document.getElementById('direct-result');
+            resultDiv.innerHTML = '测试中...';
+            
+            try {
+                const response = await axios.get('http://localhost:8080/api/dict/reservation-status');
+                resultDiv.innerHTML = `
+                    <p style="color: green;">✅ 直接请求成功!</p>
+                    <p>状态码: ${response.status}</p>
+                    <p>数据: ${JSON.stringify(response.data)}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p style="color: red;">❌ 直接请求失败!</p>
+                    <p>错误: ${error.message}</p>
+                    <p>状态码: ${error.response?.status}</p>
+                `;
+            }
+        }
+        
+        async function testRelativeRequest() {
+            const resultDiv = document.getElementById('relative-result');
+            resultDiv.innerHTML = '测试中...';
+            
+            try {
+                const response = await axios.get('/api/dict/reservation-status');
+                resultDiv.innerHTML = `
+                    <p style="color: green;">✅ 相对路径请求成功!</p>
+                    <p>状态码: ${response.status}</p>
+                    <p>数据: ${JSON.stringify(response.data)}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p style="color: red;">❌ 相对路径请求失败!</p>
+                    <p>错误: ${error.message}</p>
+                    <p>状态码: ${error.response?.status}</p>
+                `;
+            }
+        }
+        
+        async function testFullReservationFlow() {
+            const resultDiv = document.getElementById('full-result');
+            resultDiv.innerHTML = '测试中...';
+            
+            try {
+                // 测试所有相关的字典API
+                const apis = [
+                    '/api/dict/reservation-status',
+                    '/api/dict/reservation-channel',
+                    '/api/dict/room-type',
+                    '/api/dict/guest-level'
+                ];
+                
+                const results = [];
+                for (let api of apis) {
+                    try {
+                        const response = await axios.get(api);
+                        results.push(`${api}: ✅ 成功 (${response.data.data?.length || 0} 条数据)`);
+                    } catch (error) {
+                        results.push(`${api}: ❌ 失败 (${error.response?.status || '未知'})`);
+                    }
+                }
+                
+                resultDiv.innerHTML = `
+                    <p style="color: green;">✅ 完整测试完成!</p>
+                    <pre>${results.join('\n')}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <p style="color: red;">❌ 测试失败!</p>
+                    <p>错误: ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

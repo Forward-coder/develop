@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 控制台输出 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 过滤 Chrome DevTools 请求 -->
+    <logger name="org.springframework.web.servlet.resource" level="OFF" />
+    
+    <!-- 过滤其他 noisy 的静态资源请求 -->
+    <logger name="org.springframework.web.servlet.DispatcherServlet" level="INFO" />
+    
+    <!-- 项目日志 -->
+    <logger name="com.hotel.manage" level="DEBUG" />
+    
+    <!-- 根日志级别 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

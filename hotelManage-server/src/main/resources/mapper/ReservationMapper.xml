@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.manage.mapper.ReservationMapper">
+
+    <resultMap id="BaseResultMap" type="com.hotel.manage.entity.Reservation">
+        <id column="id" property="id" />
+        <result column="hotel_id" property="hotelId" />
+        <result column="reservation_no" property="reservationNo" />
+        <result column="room_type_id" property="roomTypeId" />
+        <result column="room_id" property="roomId" />
+        <result column="channel_id" property="channelId" />
+        <result column="status_id" property="statusId" />
+        <result column="check_in_date" property="checkInDate" />
+        <result column="check_out_date" property="checkOutDate" />
+        <result column="guest_name" property="guestName" />
+        <result column="guest_phone" property="guestPhone" />
+        <result column="guest_id_type_id" property="guestIdTypeId" />
+        <result column="guest_id_no" property="guestIdNo" />
+        <result column="room_rate" property="roomRate" />
+        <result column="remark" property="remark" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <!-- 关联查询字段 -->
+        <result column="room_type_name" property="roomTypeName" />
+        <result column="room_no" property="roomNo" />
+        <result column="channel_name" property="channelName" />
+        <result column="status_name" property="statusName" />
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservation (
+            hotel_id, reservation_no, room_type_id, room_id, channel_id, status_id,
+            check_in_date, check_out_date, guest_name, guest_phone, guest_id_type_id,
+            guest_id_no, room_rate, remark, created_at, updated_at
+        ) VALUES (
+            #{hotelId}, #{reservationNo}, #{roomTypeId}, #{roomId}, #{channelId}, #{statusId},
+            #{checkInDate}, #{checkOutDate}, #{guestName}, #{guestPhone}, #{guestIdTypeId},
+            #{guestIdNo}, #{roomRate}, #{remark}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE reservation
+        <set>
+            <if test="reservationNo != null">reservation_no = #{reservationNo},</if>
+            <if test="roomTypeId != null">room_type_id = #{roomTypeId},</if>
+            <if test="roomId != null">room_id = #{roomId},</if>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="statusId != null">status_id = #{statusId},</if>
+            <if test="checkInDate != null">check_in_date = #{checkInDate},</if>
+            <if test="checkOutDate != null">check_out_date = #{checkOutDate},</if>
+            <if test="guestName != null">guest_name = #{guestName},</if>
+            <if test="guestPhone != null">guest_phone = #{guestPhone},</if>
+            <if test="guestIdTypeId != null">guest_id_type_id = #{guestIdTypeId},</if>
+            <if test="guestIdNo != null">guest_id_no = #{guestIdNo},</if>
+            <if test="roomRate != null">room_rate = #{roomRate},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            updated_at = #{updatedAt}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE reservation 
+        SET status_id = #{statusId}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM reservation WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT 
+            r.id, r.hotel_id, r.reservation_no, r.room_type_id, r.room_id, r.channel_id,
+            r.status_id, r.check_in_date, r.check_out_date, r.guest_name, r.guest_phone,
+            r.guest_id_type_id, r.guest_id_no, r.room_rate, r.remark, r.created_at, r.updated_at,
+            rt.name AS room_type_name,
+            rm.room_no,
+            rc.name AS channel_name,
+            rs.name AS status_name
+        FROM reservation r
+        LEFT JOIN room_type rt ON r.room_type_id = rt.id
+        LEFT JOIN room rm ON r.room_id = rm.id
+        LEFT JOIN dict_reservation_channel rc ON r.channel_id = rc.id
+        LEFT JOIN dict_reservation_status rs ON r.status_id = rs.id
+        WHERE r.id = #{id}
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT 
+            r.id, r.hotel_id, r.reservation_no, r.room_type_id, r.room_id, r.channel_id,
+            r.status_id, r.check_in_date, r.check_out_date, r.guest_name, r.guest_phone,
+            r.guest_id_type_id, r.guest_id_no, r.room_rate, r.remark, r.created_at, r.updated_at,
+            rt.name AS room_type_name,
+            rm.room_no,
+            rc.name AS channel_name,
+            rs.name AS status_name
+        FROM reservation r
+        LEFT JOIN room_type rt ON r.room_type_id = rt.id
+        LEFT JOIN room rm ON r.room_id = rm.id
+        LEFT JOIN dict_reservation_channel rc ON r.channel_id = rc.id
+        LEFT JOIN dict_reservation_status rs ON r.status_id = rs.id
+        <where>
+            <if test="hotelId != null">AND r.hotel_id = #{hotelId}</if>
+            <if test="reservationNo != null and reservationNo != ''">AND r.reservation_no LIKE CONCAT('%', #{reservationNo}, '%')</if>
+            <if test="roomTypeId != null">AND r.room_type_id = #{roomTypeId}</if>
+            <if test="statusId != null">AND r.status_id = #{statusId}</if>
+            <if test="guestName != null and guestName != ''">AND r.guest_name LIKE CONCAT('%', #{guestName}, '%')</if>
+            <if test="checkInDate != null and checkInDate != ''">AND r.check_in_date &gt;= #{checkInDate}</if>
+            <if test="checkOutDate != null and checkOutDate != ''">AND r.check_out_date &lt;= #{checkOutDate}</if>
+        </where>
+        ORDER BY r.created_at DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.manage.mapper.RoomMapper">
+
+    <resultMap id="BaseResultMap" type="com.hotel.manage.entity.Room">
+        <id column="id" property="id" />
+        <result column="hotel_id" property="hotelId" />
+        <result column="floor_id" property="floorId" />
+        <result column="room_type_id" property="roomTypeId" />
+        <result column="room_no" property="roomNo" />
+        <result column="room_status_id" property="roomStatusId" />
+        <result column="remark" property="remark" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <!-- 关联查询字段 -->
+        <result column="floor_name" property="floorName" />
+        <result column="room_type_name" property="roomTypeName" />
+        <result column="room_status_name" property="roomStatusName" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, hotel_id, floor_id, room_type_id, room_no, room_status_id, remark, is_enabled, created_at, updated_at
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO room (hotel_id, floor_id, room_type_id, room_no, room_status_id, remark, is_enabled)
+        VALUES (#{hotelId}, #{floorId}, #{roomTypeId}, #{roomNo}, #{roomStatusId}, #{remark}, #{isEnabled})
+    </insert>
+
+    <update id="update">
+        UPDATE room
+        <set>
+            <if test="floorId != null">floor_id = #{floorId},</if>
+            <if test="roomTypeId != null">room_type_id = #{roomTypeId},</if>
+            <if test="roomNo != null">room_no = #{roomNo},</if>
+            <if test="roomStatusId != null">room_status_id = #{roomStatusId},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="isEnabled != null">is_enabled = #{isEnabled},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE room SET room_status_id = #{statusId} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM room WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM room
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT 
+            r.id, r.hotel_id, r.floor_id, r.room_type_id, r.room_no, 
+            r.room_status_id, r.remark, r.is_enabled, r.created_at, r.updated_at,
+            f.name AS floor_name,
+            rt.name AS room_type_name,
+            rs.name AS room_status_name
+        FROM room r
+        LEFT JOIN floor f ON r.floor_id = f.id
+        LEFT JOIN room_type rt ON r.room_type_id = rt.id
+        LEFT JOIN dict_room_status rs ON r.room_status_id = rs.id
+        <where>
+            <if test="hotelId != null">AND r.hotel_id = #{hotelId}</if>
+            <if test="floorId != null">AND r.floor_id = #{floorId}</if>
+            <if test="roomTypeId != null">AND r.room_type_id = #{roomTypeId}</if>
+            <if test="roomStatusId != null">AND r.room_status_id = #{roomStatusId}</if>
+            <if test="roomNo != null and roomNo != ''">AND r.room_no LIKE CONCAT('%', #{roomNo}, '%')</if>
+            <if test="isEnabled != null">AND r.is_enabled = #{isEnabled}</if>
+        </where>
+        ORDER BY r.room_no ASC
+    </select>
+
+</mapper>

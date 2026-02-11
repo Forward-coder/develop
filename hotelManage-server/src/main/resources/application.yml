@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: never
+  
+spring:
+  application:
+    name: hotel-manage-server
+  datasource:
+    url: jdbc:mysql://localhost:3306/hotel_manage?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  web:
+    resources:
+      static-locations: classpath:/static/
+      cache:
+        period: 3600
+  
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.hotel.manage.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com.hotel.manage: debug
+    org.springframework.web.servlet.resource: off
+    org.springframework.web: info

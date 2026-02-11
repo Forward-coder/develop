@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.manage.mapper.MemberMapper">
+
+    <!-- 会员结果映射 -->
+    <resultMap id="MemberResultMap" type="com.hotel.manage.entity.Member">
+        <id column="id" property="id"/>
+        <result column="guest_id" property="guestId"/>
+        <result column="member_no" property="memberNo"/>
+        <result column="level_id" property="levelId"/>
+        <result column="points" property="points"/>
+        <result column="total_points" property="totalPoints"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <!-- 关联字段 -->
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="id_type_id" property="idTypeId"/>
+        <result column="id_no" property="idNo"/>
+        <result column="remark" property="remark"/>
+        <result column="level_name" property="levelName"/>
+        <result column="status_name" property="statusName"/>
+    </resultMap>
+
+    <!-- 会员等级结果映射 -->
+    <resultMap id="MemberLevelResultMap" type="com.hotel.manage.entity.MemberLevel">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="discount_rate" property="discountRate"/>
+        <result column="min_points" property="minPoints"/>
+        <result column="is_enabled" property="isEnabled"/>
+    </resultMap>
+
+    <!-- 会员查询字段 -->
+    <sql id="Member_Column_List">
+        m.id, m.guest_id, m.member_no, m.level_id, m.points, m.total_points, m.status, m.created_at, m.updated_at,
+        g.name, g.phone, g.id_type_id, g.id_no, g.remark,
+        ml.name as level_name
+    </sql>
+
+    <!-- 获取会员列表 -->
+    <select id="selectMemberList" resultMap="MemberResultMap">
+        SELECT
+        <include refid="Member_Column_List"/>
+        FROM member m
+        LEFT JOIN guest g ON m.guest_id = g.id
+        LEFT JOIN member_level ml ON m.level_id = ml.id
+        WHERE 1=1
+        <if test="memberNo != null and memberNo != ''">
+            AND m.member_no LIKE CONCAT('%', #{memberNo}, '%')
+        </if>
+        <if test="name != null and name != ''">
+            AND g.name LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="phone != null and phone != ''">
+            AND g.phone LIKE CONCAT('%', #{phone}, '%')
+        </if>
+        <if test="idNo != null and idNo != ''">
+            AND g.id_no LIKE CONCAT('%', #{idNo}, '%')
+        </if>
+        <if test="levelId != null">
+            AND m.level_id = #{levelId}
+        </if>
+        <if test="status != null and status != ''">
+            AND m.status = #{status}
+        </if>
+        <if test="minPoints != null">
+            AND m.points >= #{minPoints}
+        </if>
+        <if test="maxPoints != null">
+            AND m.points &lt;= #{maxPoints}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND DATE(m.created_at) >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND DATE(m.created_at) &lt;= #{endDate}
+        </if>
+        ORDER BY m.created_at DESC
+    </select>
+
+    <!-- 根据ID获取会员信息 -->
+    <select id="selectMemberById" resultMap="MemberResultMap">
+        SELECT
+        <include refid="Member_Column_List"/>
+        FROM member m
+        LEFT JOIN guest g ON m.guest_id = g.id
+        LEFT JOIN member_level ml ON m.level_id = ml.id
+        WHERE m.id = #{id}
+    </select>
+
+    <!-- 根据手机号查找会员 -->
+    <select id="selectMemberByPhone" resultMap="MemberResultMap">
+        SELECT
+        <include refid="Member_Column_List"/>
+        FROM member m
+        LEFT JOIN guest g ON m.guest_id = g.id
+        LEFT JOIN member_level ml ON m.level_id = ml.id
+        WHERE g.phone = #{phone}
+    </select>
+
+    <!-- 根据会员卡号查找会员 -->
+    <select id="selectMemberByMemberNo" resultMap="MemberResultMap">
+        SELECT
+        <include refid="Member_Column_List"/>
+        FROM member m
+        LEFT JOIN guest g ON m.guest_id = g.id
+        LEFT JOIN member_level ml ON m.level_id = ml.id
+        WHERE m.member_no = #{memberNo}
+    </select>
+
+    <!-- 检查手机号是否存在 -->
+    <select id="existsMemberByPhone" resultType="int">
+        SELECT COUNT(*)
+        FROM member m
+        LEFT JOIN guest g ON m.guest_id = g.id
+        WHERE g.phone = #{phone}
+        <if test="excludeId != null">
+            AND m.id != #{excludeId}
+        </if>
+    </select>
+
+    <!-- 检查会员卡号是否存在 -->
+    <select id="existsMemberByMemberNo" resultType="int">
+        SELECT COUNT(*) FROM member
+        WHERE member_no = #{memberNo}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <!-- 插入会员信息 -->
+    <insert id="insertMember" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member (
+            guest_id, member_no, level_id, points, total_points, status, created_at, updated_at
+        ) VALUES (
+            #{guestId}, #{memberNo}, #{levelId}, #{points}, #{totalPoints}, #{status}, NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 更新会员信息 -->
+    <update id="updateMember">
+        UPDATE member
+        <set>
+            <if test="guestId != null">guest_id = #{guestId},</if>
+            <if test="levelId != null">level_id = #{levelId},</if>
+            <if test="points != null">points = #{points},</if>
+            <if test="totalPoints != null">total_points = #{totalPoints},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新会员积分 -->
+    <update id="updateMemberPoints">
+        UPDATE member
+        SET points = #{points}, total_points = #{totalPoints}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除会员信息 -->
+    <delete id="deleteMemberById">
+        DELETE FROM member WHERE id = #{id}
+    </delete>
+
+    <!-- 获取会员等级列表 -->
+    <select id="selectMemberLevelList" resultMap="MemberLevelResultMap">
+        SELECT id, name, discount_rate, min_points, is_enabled
+        FROM member_level
+        WHERE is_enabled = 1
+        ORDER BY min_points
+    </select>
+
+    <!-- 根据ID获取会员等级 -->
+    <select id="selectMemberLevelById" resultMap="MemberLevelResultMap">
+        SELECT id, name, discount_rate, min_points, is_enabled
+        FROM member_level
+        WHERE id = #{id}
+    </select>
+
+    <!-- 插入会员等级 -->
+    <insert id="insertMemberLevel" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO member_level (
+            name, discount_rate, min_points, is_enabled
+        ) VALUES (
+            #{name}, #{discountRate}, #{minPoints}, #{isEnabled}
+        )
+    </insert>
+
+    <!-- 更新会员等级 -->
+    <update id="updateMemberLevel">
+        UPDATE member_level
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="discountRate != null">discount_rate = #{discountRate},</if>
+            <if test="minPoints != null">min_points = #{minPoints},</if>
+            <if test="isEnabled != null">is_enabled = #{isEnabled},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新会员等级状态 -->
+    <update id="updateMemberLevelStatus">
+        UPDATE member_level
+        SET is_enabled = #{isEnabled}
+        WHERE id = #{id}
+    </update>
+    
+    <!-- 获取当日最大会员ID -->
+    <select id="getMaxIdToday" resultType="java.lang.Long">
+        SELECT MAX(id)
+        FROM member
+        WHERE DATE(created_at) = CURDATE()
+    </select>
+
+    <!-- 获取会员统计信息 -->
+    <select id="getMemberStatistics" resultType="map">
+        SELECT 
+            COUNT(*) as total_members,
+            SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active_members,
+            SUM(CASE WHEN status = 'inactive' THEN 1 ELSE 0 END) as inactive_members,
+            AVG(points) as avg_points,
+            MAX(points) as max_points,
+            MIN(points) as min_points
+        FROM member
+    </select>
+
+    <!-- 按等级统计会员数量 -->
+    <select id="getMemberCountByLevel" resultType="map">
+        SELECT 
+            ml.name as level_name,
+            COUNT(m.id) as member_count
+        FROM member_level ml
+        LEFT JOIN member m ON ml.id = m.level_id AND m.status = 'active'
+        WHERE ml.is_enabled = 1
+        GROUP BY ml.id, ml.name
+        ORDER BY ml.min_points
+    </select>
+
+</mapper>

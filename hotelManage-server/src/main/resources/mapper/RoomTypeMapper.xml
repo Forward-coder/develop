@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.manage.mapper.RoomTypeMapper">
+
+    <resultMap id="BaseResultMap" type="com.hotel.manage.entity.RoomType">
+        <id column="id" property="id" />
+        <result column="hotel_id" property="hotelId" />
+        <result column="code" property="code" />
+        <result column="name" property="name" />
+        <result column="area" property="area" />
+        <result column="bed_type_id" property="bedTypeId" />
+        <result column="max_guests" property="maxGuests" />
+        <result column="base_price" property="basePrice" />
+        <result column="sort_order" property="sortOrder" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <!-- 关联查询字段 -->
+        <result column="bed_type_name" property="bedTypeName" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, hotel_id, code, name, area, bed_type_id, max_guests, base_price, sort_order, is_enabled, created_at, updated_at
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO room_type (hotel_id, code, name, area, bed_type_id, max_guests, base_price, sort_order, is_enabled)
+        VALUES (#{hotelId}, #{code}, #{name}, #{area}, #{bedTypeId}, #{maxGuests}, #{basePrice}, #{sortOrder}, #{isEnabled})
+    </insert>
+
+    <update id="update">
+        UPDATE room_type
+        <set>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="area != null">area = #{area},</if>
+            <if test="bedTypeId != null">bed_type_id = #{bedTypeId},</if>
+            <if test="maxGuests != null">max_guests = #{maxGuests},</if>
+            <if test="basePrice != null">base_price = #{basePrice},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="isEnabled != null">is_enabled = #{isEnabled},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM room_type WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM room_type
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT 
+            rt.id, rt.hotel_id, rt.code, rt.name, rt.area, rt.bed_type_id,
+            rt.max_guests, rt.base_price, rt.sort_order, rt.is_enabled,
+            rt.created_at, rt.updated_at,
+            bt.name AS bed_type_name
+        FROM room_type rt
+        LEFT JOIN dict_bed_type bt ON rt.bed_type_id = bt.id
+        <where>
+            <if test="hotelId != null">AND rt.hotel_id = #{hotelId}</if>
+            <if test="isEnabled != null">AND rt.is_enabled = #{isEnabled}</if>
+        </where>
+        ORDER BY rt.sort_order ASC
+    </select>
+
+    <select id="selectListByParams" resultMap="BaseResultMap">
+        SELECT 
+            rt.id, rt.hotel_id, rt.code, rt.name, rt.area, rt.bed_type_id,
+            rt.max_guests, rt.base_price, rt.sort_order, rt.is_enabled,
+            rt.created_at, rt.updated_at,
+            bt.name AS bed_type_name
+        FROM room_type rt
+        LEFT JOIN dict_bed_type bt ON rt.bed_type_id = bt.id
+        <where>
+            <if test="hotelId != null">AND rt.hotel_id = #{hotelId}</if>
+            <if test="name != null and name != ''">AND rt.name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="bedTypeId != null">AND rt.bed_type_id = #{bedTypeId}</if>
+            <if test="isEnabled != null">AND rt.is_enabled = #{isEnabled}</if>
+        </where>
+        ORDER BY rt.sort_order ASC
+    </select>
+
+</mapper>

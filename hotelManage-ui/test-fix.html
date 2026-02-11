@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数组安全检查测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>数组安全检查修复测试</h1>
+    
+    <div class="test-section">
+        <h2>会员列表计算属性测试</h2>
+        <button onclick="testAveragePoints()">测试平均积分计算</button>
+        <button onclick="testTodayMembers()">测试今日新增计算</button>
+        <div id="member-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>统计页面数据处理测试</h2>
+        <button onclick="testRankingMap()">测试积分排行映射</button>
+        <button onclick="testChartRendering()">测试图表渲染</button>
+        <div id="stats-result" class="result"></div>
+    </div>
+
+    <script>
+        // 模拟修复后的计算逻辑
+        function testAveragePoints() {
+            const resultDiv = document.getElementById('member-result');
+            
+            // 测试各种情况
+            const testCases = [
+                { name: '正常数组', data: [{ points: 100 }, { points: 200 }, { points: 300 }] },
+                { name: '空数组', data: [] },
+                { name: 'null值', data: null },
+                { name: 'undefined值', data: undefined },
+                { name: '非数组对象', data: { points: 100 } },
+                { name: '混合数据', data: [{ points: 100 }, { points: null }, { points: 200 }] }
+            ];
+            
+            let results = '<h3>平均积分计算结果：</h3>';
+            
+            testCases.forEach(testCase => {
+                try {
+                    let average = 0;
+                    if (Array.isArray(testCase.data) && testCase.data.length > 0) {
+                        const total = testCase.data.reduce((sum, member) => sum + (member.points || 0), 0);
+                        average = Math.round(total / testCase.data.length);
+                    }
+                    
+                    results += `<div class="success">${testCase.name}: 平均积分 = ${average}</div>`;
+                } catch (error) {
+                    results += `<div class="error">${testCase.name}: 错误 - ${error.message}</div>`;
+                }
+            });
+            
+            resultDiv.innerHTML = results;
+        }
+        
+        function testTodayMembers() {
+            const resultDiv = document.getElementById('member-result');
+            
+            // 生成今天的日期
+            const today = new Date().toISOString().split('T')[0];
+            
+            const testCases = [
+                { 
+                    name: '包含今天数据', 
+                    data: [
+                        { createdAt: today + ' 10:00:00' },
+                        { createdAt: '2024-01-01 10:00:00' },
+                        { createdAt: today + ' 15:00:00' }
+                    ] 
+                },
+                { name: '无今天数据', data: [{ createdAt: '2024-01-01' }] },
+                { name: '空数组', data: [] },
+                { name: 'null值', data: null },
+                { name: '无createdAt字段', data: [{ name: 'test' }] }
+            ];
+            
+            let results = '<h3>今日新增计算结果：</h3>';
+            
+            testCases.forEach(testCase => {
+                try {
+                    let count = 0;
+                    if (Array.isArray(testCase.data)) {
+                        count = testCase.data.filter(member => 
+                            member.createdAt && member.createdAt.startsWith(today)
+                        ).length;
+                    }
+                    
+                    results += `<div class="success">${testCase.name}: 今日新增 = ${count}</div>`;
+                } catch (error) {
+                    results += `<div class="error">${testCase.name}: 错误 - ${error.message}</div>`;
+                }
+            });
+            
+            resultDiv.innerHTML += results;
+        }
+        
+        function testRankingMap() {
+            const resultDiv = document.getElementById('stats-result');
+            
+            const testCases = [
+                { 
+                    name: '正常数组数据', 
+                    data: [
+                        { name: '张三', points: 1000 },
+                        { name: '李四', points: 800 },
+                        { name: '王五', points: 600 }
+                    ] 
+                },
+                { name: '空数组', data: [] },
+                { name: 'null值', data: null },
+                { name: '非数组', data: { name: '张三' } }
+            ];
+            
+            let results = '<h3>积分排行映射结果：</h3>';
+            
+            testCases.forEach(testCase => {
+                try {
+                    let mappedData = [];
+                    if (Array.isArray(testCase.data)) {
+                        mappedData = testCase.data.map((member, index) => ({
+                            ...member,
+                            rank: index + 1
+                        }));
+                    }
+                    
+                    results += `<div class="success">${testCase.name}: 映射成功，共${mappedData.length}条记录</div>`;
+                    if (mappedData.length > 0) {
+                        results += `<div style="font-size: 12px; margin-left: 20px;">示例: ${JSON.stringify(mappedData[0])}</div>`;
+                    }
+                } catch (error) {
+                    results += `<div class="error">${testCase.name}: 错误 - ${error.message}</div>`;
+                }
+            });
+            
+            resultDiv.innerHTML = results;
+        }
+        
+        function testChartRendering() {
+            const resultDiv = document.getElementById('stats-result');
+            
+            const testData = [
+                { levelName: '普通会员', count: 50 },
+                { levelName: '银卡会员', count: 30 },
+                { levelName: '金卡会员', count: 15 },
+                { levelName: '钻石会员', count: 5 }
+            ];
+            
+            let results = '<h3>图表渲染模拟：</h3>';
+            
+            try {
+                // 模拟饼图数据处理
+                if (Array.isArray(testData)) {
+                    const pieData = testData.map(item => ({
+                        name: item.levelName,
+                        value: item.count
+                    }));
+                    
+                    results += `<div class="success">饼图数据处理成功: ${pieData.length}个数据点</div>`;
+                    results += `<div style="font-size: 12px; margin-left: 20px;">数据: ${JSON.stringify(pieData)}</div>`;
+                }
+                
+                // 模拟折线图数据处理
+                const months = ['1月', '2月', '3月', '4月'];
+                const newMembers = [10, 15, 12, 18];
+                
+                results += `<div class="success">折线图数据处理成功: ${months.length}个月份数据</div>`;
+                
+            } catch (error) {
+                results += `<div class="error">图表渲染错误: ${error.message}</div>`;
+            }
+            
+            resultDiv.innerHTML += results;
+        }
+    </script>
+</body>
+</html>
