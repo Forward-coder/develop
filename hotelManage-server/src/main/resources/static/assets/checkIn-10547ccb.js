@@ -1,1 +1,0 @@
-import{r as t}from"./request-3269837c.js";function c(e={}){return t({url:"/api/check-in/list",method:"get",params:e})}function i(e){return t({url:"/api/check-in/check-in",method:"post",data:e})}function o(e,n){return t({url:`/api/check-in/${e}/extend`,method:"post",data:n})}export{i as d,o as e,c as g};
