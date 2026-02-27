@@ -47,7 +47,7 @@
         SELECT <include refid="Base_Column_List" />
         FROM floor
         <where>
-            <if test="hotelId != null">AND hotel_id = #{hotelId}</if>
+            <if test="hotelId != null">hotel_id = #{hotelId}</if>
             <if test="isEnabled != null">AND is_enabled = #{isEnabled}</if>
         </where>
         ORDER BY sort_order ASC
